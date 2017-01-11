@@ -3,103 +3,115 @@ package sample;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import sample.enumerations.Gender;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+/*TODO
+-trzeba zrobić tak, żeby dodanie wyników zawodów powodowało zaktualizowanie punktów w wynikach zawodów
+-ADMIN: dodawanie sezonu, dodawanie zawodów + wyników zawodów, dodawanie zawodników
+-wyświetlenie listy zawodów w sezonie
+-wyświetlenie listy zawodników w sezonie
+ */
 public class Main extends Application {
 
     public static Connection dbConnection;
+    private Scene mainScene;
 
     @Override
     public void start(Stage mainWindow) throws Exception{
         mainWindow.setTitle("Ranking Puchar Świata w windsurfingu!");
 
-        try{
-            //Połączenie z BD
-            dbConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb?useSSl=false", "root", "root");
-        }catch(Exception ex){
-            AlertBox.Display("Błąd połączenia", ex.getMessage());
-        }
+        //ChoiceBox do wyboru płci
+        ChoiceBox<Gender> genderChoiceBox = new ChoiceBox<>();
+        genderChoiceBox.getItems().addAll(Gender.MALE, Gender.FEMALE);
+        genderChoiceBox.setValue(Gender.MALE);
 
-        //Zapytanie
-        Statement statement = dbConnection.createStatement();
+        //ChoiceBox do wyboru sezonu
+        ChoiceBox<Integer> seasonChoiceBox = new ChoiceBox<>();
+        seasonChoiceBox.getItems().addAll(2014, 2015, 2016);
+        seasonChoiceBox.setValue(seasonChoiceBox.getItems().get(seasonChoiceBox.getItems().size() - 1)); // najnowszy sezon
 
-        //Pobranie danych
-        ResultSet dataSet = statement.executeQuery("SELECT * FROM zawodnicy");
+        //Przycisk wyświetlający klasyfikację generalną danego sezonu (wyświetlana od razu domyślnie)
+        Button rankingButton = new Button("Klasyfikacja sezonu");
 
-        ObservableList<Sailor> sailorsObservableList = FXCollections.observableArrayList();
+        //Przycisk wyświetlający listę zawodów w sezonie
+        Button eventsListButton = new Button("Lista zawodów");
 
-        while(dataSet.next()){
-            sailorsObservableList.add(
-                    new Sailor(dataSet.getString("nr_rejestracyjny"),
-                                dataSet.getString("imie"),
-                                dataSet.getString("nazwisko"),
-                                dataSet.getString("plec"),
-                                dataSet.getString("narodowosc"),
-                                dataSet.getString("marka_desek"),
-                                dataSet.getString("marka_zagli"),
-                                dataSet.getString("sponsorzy")));
-        }
+        //Przycisk wyświetlający listę zawodników/zawodniczek startujących w danym sezonie
+        Button sailorListButton = new Button("Lista startujących w sezonie");
 
-        TableView<Sailor> sailorsTable;
 
-        TableColumn<Sailor, String> sailNumberColumn = new TableColumn<>("sailNumber");
-        sailNumberColumn.setMinWidth(200);
-        sailNumberColumn.setCellValueFactory(new PropertyValueFactory<>("sailNumber"));
+        TableColumn<Sailor, String> placeColumn = new TableColumn<>("Miejsce");
+        placeColumn.setMinWidth(200);
+        placeColumn.setCellValueFactory(new PropertyValueFactory<>("placeInTable"));
 
-        TableColumn<Sailor, String> nameColumn = new TableColumn<>("name");
+        TableColumn<Sailor, String> nameColumn = new TableColumn<>("Imię");
         nameColumn.setMinWidth(200);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        TableColumn<Sailor, String> surnameColumn = new TableColumn<>("surname");
+        TableColumn<Sailor, String> surnameColumn = new TableColumn<>("Nazwisko");
         surnameColumn.setMinWidth(200);
         surnameColumn.setCellValueFactory(new PropertyValueFactory<>("surname"));
 
-        TableColumn<Sailor, String> sexColumn = new TableColumn<>("sex");
-        sexColumn.setMinWidth(200);
-        sexColumn.setCellValueFactory(new PropertyValueFactory<>("sex"));
+        TableColumn<Sailor, String> sailNumberColumn = new TableColumn<>("Nr rejestracyjny");
+        sailNumberColumn.setMinWidth(200);
+        sailNumberColumn.setCellValueFactory(new PropertyValueFactory<>("sailNumber"));
 
-        TableColumn<Sailor, String> nationalityColumn = new TableColumn<>("nationality");
-        nationalityColumn.setMinWidth(200);
-        nationalityColumn.setCellValueFactory(new PropertyValueFactory<>("nationality"));
+        TableColumn<Sailor, String> pointsColumn = new TableColumn<>("Punkty");
+        pointsColumn.setMinWidth(200);
+        pointsColumn.setCellValueFactory(new PropertyValueFactory<>("seasonPoints"));
 
-        TableColumn<Sailor, String> sailBrandColumn = new TableColumn<>("sailBrand");
-        sailBrandColumn.setMinWidth(200);
-        sailBrandColumn.setCellValueFactory(new PropertyValueFactory<>("sailBrand"));
+        ObservableList<Sailor> sailorsObservableList = FXCollections.observableArrayList();
+        try {
+            sailorsObservableList = SeasonRanking.getSailorsObservableList(dbConnection, genderChoiceBox.getValue(), seasonChoiceBox.getValue());
+        }catch(Exception ex){
+            AlertBox.Display("Bład pobierania danych", ex.getMessage());
+        }
+        TableView<Sailor> rankingTableView = new TableView<>();
+        rankingTableView.setItems(sailorsObservableList);
+        rankingTableView.getColumns().addAll(placeColumn, nameColumn, surnameColumn, sailNumberColumn, pointsColumn );
 
-        TableColumn<Sailor, String> boardBrandColumn = new TableColumn<>("boardBrand");
-        boardBrandColumn.setMinWidth(200);
-        boardBrandColumn.setCellValueFactory(new PropertyValueFactory<>("boardBrand"));
+        //Layout
+        GridPane layout = new GridPane();
+        layout.setPadding(new Insets(10,10,10,10));
+        layout.setHgap(8);
+        layout.setVgap(8);
+        layout.add(genderChoiceBox, 0,0);
+        layout.add(seasonChoiceBox, 1,0);
+        layout.add(rankingButton,2,0);
+        layout.add(eventsListButton,3,0);
+        layout.add(sailorListButton, 4,0);
+        layout.add(rankingTableView,0,1,5,1);
 
-        TableColumn<Sailor, String> sponsorsColumn = new TableColumn<>("sponsors");
-        sponsorsColumn.setMinWidth(200);
-        sponsorsColumn.setCellValueFactory(new PropertyValueFactory<>("sponsors"));
 
-        sailorsTable = new TableView<>();
-        sailorsTable.setItems(sailorsObservableList);
-        sailorsTable.getColumns().addAll(sailNumberColumn, nameColumn,
-                surnameColumn, sexColumn,
-                nationalityColumn, sailBrandColumn,
-                boardBrandColumn, sponsorsColumn);
-
-        VBox vbox = new VBox();
-        vbox.getChildren().addAll(sailorsTable);
-        Scene scene = new Scene(vbox);
-        mainWindow.setScene(scene);
+        mainScene = new Scene(layout);
+        mainWindow.setScene(mainScene);
         mainWindow.show();
     }
 
 
     public static void main(String[] args) {
+        try{
+            //Połączenie z BD
+            dbConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb?useSSl=false", "root", "root");
+        }catch(Exception ex){
+            AlertBox.Display("Błąd połączenia", ex.getMessage());
+            return;
+        }
         launch(args);
     }
 }
