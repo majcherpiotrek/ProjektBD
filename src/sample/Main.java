@@ -15,8 +15,10 @@ import java.sql.DriverManager;
 
 
 /*TODO
+
 -trzeba zrobić tak, żeby dodanie wyników zawodów powodowało zaktualizowanie punktów w wynikach zawodów
--ADMIN: logowanie, dodawanie sezonu, dodawanie zawodów + wyników zawodów, dodawanie zawodników
+-przy dodawaniu wyników zawodów sprawdzać, czy zawodnicy na liście istnieją w tabeli zawodników!
+-ADMIN: dodawanie sezonu, dodawanie zawodów + wyników zawodów, dodawanie zawodników
 -listenery do choiceboxów
 -wyświetlanie profilu zawodnika po wybraniu go z listy
 -wyświetlanie profilu zawodów lub wyników zawodów po wybraniu ich z listy
