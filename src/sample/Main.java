@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import sample.enumerations.Gender;
 import java.sql.Connection;
@@ -15,7 +16,7 @@ import java.sql.DriverManager;
 
 
 /*TODO
-
+-wrzucić buttony do funkcji ustawiających scenę zamiast globalnych
 -trzeba zrobić tak, żeby dodanie wyników zawodów powodowało zaktualizowanie punktów w wynikach zawodów
 -przy dodawaniu wyników zawodów sprawdzać, czy zawodnicy na liście istnieją w tabeli zawodników!
 -ADMIN: dodawanie sezonu, dodawanie zawodów + wyników zawodów, dodawanie zawodników
@@ -66,8 +67,8 @@ public class Main extends Application {
         //Przycisk wyświetlający klasyfikację generalną danego sezonu (wyświetlana od razu domyślnie)
         rankingButton = new Button("Klasyfikacja sezonu");
         rankingButton.setOnAction(e -> {
-            if(layout.getChildren().size() == 1)
-                initStandardLayout(layout);
+            //if(layout.getChildren().size() == 1)
+              //  initStandardLayout(layout);
             mainWindow.setScene(mainScene);
         });
 
@@ -75,7 +76,7 @@ public class Main extends Application {
         eventsListButton = new Button("Lista zawodów");
         eventsListButton.setOnAction(event -> {
             try {
-                setEventsListLayout();
+                setEventsListLayout(mainWindow);
 
             }catch (Exception ex){
                 AlertBox.Display("Błąd pobierania danych", ex.getMessage());
@@ -86,7 +87,7 @@ public class Main extends Application {
         sailorListButton = new Button("Lista wszystkich zawodników");
         sailorListButton.setOnAction(e -> {
             try {
-                setAllCompetitorsListLayout();
+                setAllCompetitorsListLayout(mainWindow);
             }catch(Exception ex){
                 AlertBox.Display("Błąd pobierania danych", ex.getMessage());
             }
@@ -97,6 +98,8 @@ public class Main extends Application {
             Boolean isLoggedIn = false;
             isLoggedIn = LoginWindow.Display(dbConnection);
             System.out.println(isLoggedIn);
+            if(isLoggedIn)
+                setAdminInterfaceScene(mainScene, mainWindow);
         });
 
         TableView<Sailor> rankingTableView = new TableView<>();
@@ -143,28 +146,34 @@ public class Main extends Application {
         layoutToInit.add(adminLoginButton, 0, 2);
     }
 
-    private void setAllCompetitorsListLayout() throws Exception{
+    private void setSeasonRankingScene(Stage parentWindow) throws Exception{
+
+    }
+    private void setAllCompetitorsListLayout(Stage parentWindow) throws Exception{
 
         GridPane allCompetitorsLayout = new GridPane();
         //zainicjowanie wspólnych przycisków
-        initStandardLayout(allCompetitorsLayout);
+        allCompetitorsLayout.setPadding(new Insets(10,10,10,10));
+        allCompetitorsLayout.setHgap(8);
+        allCompetitorsLayout.setVgap(8);
 
-        //usunięcie wyboru płci i sezonu (niepotrzebne na liście wszystkich zawodników)
-        allCompetitorsLayout.getChildren().remove(genderChoiceBox);
-        allCompetitorsLayout.getChildren().remove(seasonChoiceBox);
 
         //Pozyskanie danych z bazy
         ObservableList<Sailor> allCompetitorsObservableList = AllCompetitorsList.getSailorsObservableList(dbConnection);
         TableView<Sailor> allCompetitorsTableView = AllCompetitorsList.createAllCompetitorsTableView(allCompetitorsObservableList);
 
-        //Dodanie tabeli do layoutu
-        allCompetitorsLayout.add(allCompetitorsTableView, 0, 1, 5, 1);
+        //Dodanie buttonów i tabeli do layoutu
+        allCompetitorsLayout.add(rankingButton,0,0);
+        allCompetitorsLayout.add(eventsListButton,1,0);
+        allCompetitorsLayout.add(sailorListButton, 2,0);
+        allCompetitorsLayout.add(adminLoginButton, 0,2);
+        allCompetitorsLayout.add(allCompetitorsTableView, 0, 1, 3, 1);
 
         Scene allCompetitorsScene = new Scene(allCompetitorsLayout);
-        mainWindow.setScene(allCompetitorsScene);
+        parentWindow.setScene(allCompetitorsScene);
     }
 
-    private void setEventsListLayout() throws Exception{
+    private void setEventsListLayout(Stage parentWindow) throws Exception{
         GridPane eventsListLayout = new GridPane();
         initStandardLayout(eventsListLayout);
 
@@ -173,7 +182,20 @@ public class Main extends Application {
         eventsListLayout.add(eventsInSeasonTableView,0, 1,5,1);
 
         Scene eventsListScene = new Scene(eventsListLayout);
-        mainWindow.setScene(eventsListScene);
+        parentWindow.setScene(eventsListScene);
     }
+
+    private void setAdminInterfaceScene(Scene parentScene, Stage parentWindow){
+        Button back = new Button("back");
+        back.setOnAction(e->{
+            parentWindow.setScene(parentScene);
+        });
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(back);
+        Scene scene = new Scene(vBox);
+        parentWindow.setScene(scene);
+    }
+
 
 }
