@@ -39,6 +39,14 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+        try{
+            //Połączenie z BD
+            dbConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb?useSSl=false", "root", "root");
+        }catch(Exception ex){
+            AlertBox.Display("Błąd połączenia", ex.getMessage());
+            return;
+        }
+
         mainWindow=primaryStage;
         mainWindow.setTitle("Ranking Puchar Świata w windsurfingu!");
 
@@ -109,13 +117,6 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-        try{
-            //Połączenie z BD
-            dbConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydb?useSSl=false", "root", "root");
-        }catch(Exception ex){
-            AlertBox.Display("Błąd połączenia", ex.getMessage());
-            return;
-        }
         launch(args);
     }
     private void initStandardLayout(GridPane layoutToInit){
@@ -132,12 +133,18 @@ public class Main extends Application {
     private void setAllCompetitorsListLayout() throws Exception{
 
         GridPane allCompetitorsLayout = new GridPane();
+        //zainicjowanie wspólnych przycisków
         initStandardLayout(allCompetitorsLayout);
 
+        //usunięcie wyboru płci i sezonu (niepotrzebne na liście wszystkich zawodników)
         allCompetitorsLayout.getChildren().remove(genderChoiceBox);
         allCompetitorsLayout.getChildren().remove(seasonChoiceBox);
+
+        //Pozyskanie danych z bazy
         ObservableList<Sailor> allCompetitorsObservableList = AllCompetitorsList.getSailorsObservableList(dbConnection);
         TableView<Sailor> allCompetitorsTableView = AllCompetitorsList.createAllCompetitorsTableView(allCompetitorsObservableList);
+
+        //Dodanie tabeli do layoutu
         allCompetitorsLayout.add(allCompetitorsTableView, 0, 1, 5, 1);
 
         Scene allCompetitorsScene = new Scene(allCompetitorsLayout);

@@ -67,6 +67,4 @@ public class WindsurfingEvent {
     public void setSeason(Integer season) {
         this.season = season;
     }
-
-
 }

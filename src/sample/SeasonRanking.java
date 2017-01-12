@@ -53,7 +53,6 @@ public class SeasonRanking {
                 sailor.setPlaceInTable(orderNumber++);
                 sailorsObservableList.add(sailor);
             }
-            query = null;
         }
 
         return sailorsObservableList;
