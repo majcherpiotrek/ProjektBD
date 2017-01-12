@@ -18,7 +18,7 @@ public class Sailor {
 
 
 
-    public Sailor(String sailNumber, String name,
+    Sailor(String sailNumber, String name,
                   String surname, String sex,
                   String nationality, String boardBrand,
                   String sailBrand, String sponsors){

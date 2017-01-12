@@ -10,9 +10,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class AlertBox {
+class AlertBox {
 
-    public static void Display(String windowTitle, String message) {
+    static void Display(String windowTitle, String message) {
 
         Stage AlertBoxWindow = new Stage();
         AlertBoxWindow.initModality(Modality.APPLICATION_MODAL); //razem z showAndWait() powoduje, że nie można edytować innego okna, zanim to nie zostanie zamknięte

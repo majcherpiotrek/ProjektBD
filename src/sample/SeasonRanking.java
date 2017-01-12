@@ -2,6 +2,9 @@ package sample;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import sample.enumerations.Gender;
 
 import java.sql.Connection;
@@ -54,5 +57,34 @@ public class SeasonRanking {
         }
 
         return sailorsObservableList;
+    }
+
+    public static TableView<Sailor> createSeasonRankigTableView(ObservableList<Sailor> sailorsObservableList){
+        TableColumn<Sailor, String> placeColumn = new TableColumn<>("Miejsce");
+        placeColumn.setMinWidth(200);
+        placeColumn.setCellValueFactory(new PropertyValueFactory<>("placeInTable"));
+
+        TableColumn<Sailor, String> nameColumn = new TableColumn<>("Imię");
+        nameColumn.setMinWidth(200);
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Sailor, String> surnameColumn = new TableColumn<>("Nazwisko");
+        surnameColumn.setMinWidth(200);
+        surnameColumn.setCellValueFactory(new PropertyValueFactory<>("surname"));
+
+        TableColumn<Sailor, String> sailNumberColumn = new TableColumn<>("Nr rejestracyjny");
+        sailNumberColumn.setMinWidth(200);
+        sailNumberColumn.setCellValueFactory(new PropertyValueFactory<>("sailNumber"));
+
+        TableColumn<Sailor, String> pointsColumn = new TableColumn<>("Punkty");
+        pointsColumn.setMinWidth(200);
+        pointsColumn.setCellValueFactory(new PropertyValueFactory<>("seasonPoints"));
+
+
+        TableView<Sailor> rankingTableView = new TableView<>();
+        rankingTableView.setItems(sailorsObservableList);
+        rankingTableView.getColumns().addAll(placeColumn, nameColumn, surnameColumn, sailNumberColumn, pointsColumn );
+
+        return rankingTableView;
     }
 }

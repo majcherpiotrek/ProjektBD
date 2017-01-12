@@ -1,92 +1,96 @@
 package sample;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import sample.enumerations.Gender;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+
 
 /*TODO
 -trzeba zrobić tak, żeby dodanie wyników zawodów powodowało zaktualizowanie punktów w wynikach zawodów
--ADMIN: dodawanie sezonu, dodawanie zawodów + wyników zawodów, dodawanie zawodników
--wyświetlenie listy zawodów w sezonie
--wyświetlenie listy zawodników w sezonie
+-ADMIN: logowanie, dodawanie sezonu, dodawanie zawodów + wyników zawodów, dodawanie zawodników
+-listenery do choiceboxów
+-wyświetlanie profilu zawodnika po wybraniu go z listy
+-wyświetlanie profilu zawodów lub wyników zawodów po wybraniu ich z listy
+
+PO ZROBIENIU DODAWANIA DANYCH PRZEZ ADMINA:
+-dodać kobiety
+-dodać kilka sezonów
  */
 public class Main extends Application {
 
-    public static Connection dbConnection;
+    private static Connection dbConnection;
+    private Stage mainWindow;
     private Scene mainScene;
+    private GridPane layout;
+    private ChoiceBox<Gender> genderChoiceBox;
+    private ChoiceBox<Integer> seasonChoiceBox;
+    private Button rankingButton;
+    private Button eventsListButton;
+    private Button sailorListButton;
 
     @Override
-    public void start(Stage mainWindow) throws Exception{
+    public void start(Stage primaryStage) throws Exception{
+        mainWindow=primaryStage;
         mainWindow.setTitle("Ranking Puchar Świata w windsurfingu!");
 
         //ChoiceBox do wyboru płci
-        ChoiceBox<Gender> genderChoiceBox = new ChoiceBox<>();
+        genderChoiceBox = new ChoiceBox<>();
         genderChoiceBox.getItems().addAll(Gender.MALE, Gender.FEMALE);
         genderChoiceBox.setValue(Gender.MALE);
 
         //ChoiceBox do wyboru sezonu
-        ChoiceBox<Integer> seasonChoiceBox = new ChoiceBox<>();
+        seasonChoiceBox = new ChoiceBox<>();
         seasonChoiceBox.getItems().addAll(2014, 2015, 2016);
         seasonChoiceBox.setValue(seasonChoiceBox.getItems().get(seasonChoiceBox.getItems().size() - 1)); // najnowszy sezon
 
         //Przycisk wyświetlający klasyfikację generalną danego sezonu (wyświetlana od razu domyślnie)
-        Button rankingButton = new Button("Klasyfikacja sezonu");
+        rankingButton = new Button("Klasyfikacja sezonu");
+        rankingButton.setOnAction(e -> {
+            if(layout.getChildren().size() == 1)
+                initStandardLayout(layout);
+            mainWindow.setScene(mainScene);
+        });
 
         //Przycisk wyświetlający listę zawodów w sezonie
-        Button eventsListButton = new Button("Lista zawodów");
+        eventsListButton = new Button("Lista zawodów");
+        eventsListButton.setOnAction(event -> {
+            try {
+                setEventsListLayout();
 
-        //Przycisk wyświetlający listę zawodników/zawodniczek startujących w danym sezonie
-        Button sailorListButton = new Button("Lista startujących w sezonie");
+            }catch (Exception ex){
+                AlertBox.Display("Błąd pobierania danych", ex.getMessage());
+            }
+        });
 
+        //Przycisk wyświetlający listę wszystkich zawodników i zawodniczek
+        sailorListButton = new Button("Lista wszystkich zawodników");
+        sailorListButton.setOnAction(e -> {
+            try {
+                setAllCompetitorsListLayout();
+            }catch(Exception ex){
+                AlertBox.Display("Błąd pobierania danych", ex.getMessage());
+            }
+        });
 
-        TableColumn<Sailor, String> placeColumn = new TableColumn<>("Miejsce");
-        placeColumn.setMinWidth(200);
-        placeColumn.setCellValueFactory(new PropertyValueFactory<>("placeInTable"));
-
-        TableColumn<Sailor, String> nameColumn = new TableColumn<>("Imię");
-        nameColumn.setMinWidth(200);
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        TableColumn<Sailor, String> surnameColumn = new TableColumn<>("Nazwisko");
-        surnameColumn.setMinWidth(200);
-        surnameColumn.setCellValueFactory(new PropertyValueFactory<>("surname"));
-
-        TableColumn<Sailor, String> sailNumberColumn = new TableColumn<>("Nr rejestracyjny");
-        sailNumberColumn.setMinWidth(200);
-        sailNumberColumn.setCellValueFactory(new PropertyValueFactory<>("sailNumber"));
-
-        TableColumn<Sailor, String> pointsColumn = new TableColumn<>("Punkty");
-        pointsColumn.setMinWidth(200);
-        pointsColumn.setCellValueFactory(new PropertyValueFactory<>("seasonPoints"));
-
-        ObservableList<Sailor> sailorsObservableList = FXCollections.observableArrayList();
-        try {
-            sailorsObservableList = SeasonRanking.getSailorsObservableList(dbConnection, genderChoiceBox.getValue(), seasonChoiceBox.getValue());
-        }catch(Exception ex){
-            AlertBox.Display("Bład pobierania danych", ex.getMessage());
-        }
         TableView<Sailor> rankingTableView = new TableView<>();
-        rankingTableView.setItems(sailorsObservableList);
-        rankingTableView.getColumns().addAll(placeColumn, nameColumn, surnameColumn, sailNumberColumn, pointsColumn );
+        try{
+            ObservableList<Sailor> sailorObservableList = SeasonRanking.getSailorsObservableList(dbConnection, genderChoiceBox.getValue(), seasonChoiceBox.getValue());
+            rankingTableView = SeasonRanking.createSeasonRankigTableView(sailorObservableList);
+        }catch (Exception ex){
+            AlertBox.Display("Błąd pobierania danych", ex.getMessage());
+        }
 
         //Layout
-        GridPane layout = new GridPane();
+        layout = new GridPane();
         layout.setPadding(new Insets(10,10,10,10));
         layout.setHgap(8);
         layout.setVgap(8);
@@ -114,4 +118,42 @@ public class Main extends Application {
         }
         launch(args);
     }
+    private void initStandardLayout(GridPane layoutToInit){
+        layoutToInit.setPadding(new Insets(10,10,10,10));
+        layoutToInit.setHgap(8);
+        layoutToInit.setVgap(8);
+        layoutToInit.add(genderChoiceBox, 0,0);
+        layoutToInit.add(seasonChoiceBox, 1,0);
+        layoutToInit.add(rankingButton,2,0);
+        layoutToInit.add(eventsListButton,3,0);
+        layoutToInit.add(sailorListButton, 4,0);
+    }
+
+    private void setAllCompetitorsListLayout() throws Exception{
+
+        GridPane allCompetitorsLayout = new GridPane();
+        initStandardLayout(allCompetitorsLayout);
+
+        allCompetitorsLayout.getChildren().remove(genderChoiceBox);
+        allCompetitorsLayout.getChildren().remove(seasonChoiceBox);
+        ObservableList<Sailor> allCompetitorsObservableList = AllCompetitorsList.getSailorsObservableList(dbConnection);
+        TableView<Sailor> allCompetitorsTableView = AllCompetitorsList.createAllCompetitorsTableView(allCompetitorsObservableList);
+        allCompetitorsLayout.add(allCompetitorsTableView, 0, 1, 5, 1);
+
+        Scene allCompetitorsScene = new Scene(allCompetitorsLayout);
+        mainWindow.setScene(allCompetitorsScene);
+    }
+
+    private void setEventsListLayout() throws Exception{
+        GridPane eventsListLayout = new GridPane();
+        initStandardLayout(eventsListLayout);
+
+        ObservableList<WindsurfingEvent> eventsInSeasonObservableList = EventsInSeason.getEventsObservableList(dbConnection, seasonChoiceBox.getValue());
+        TableView<WindsurfingEvent> eventsInSeasonTableView = EventsInSeason.createEventsInSeasonTableView(eventsInSeasonObservableList);
+        eventsListLayout.add(eventsInSeasonTableView,0, 1,5,1);
+
+        Scene eventsListScene = new Scene(eventsListLayout);
+        mainWindow.setScene(eventsListScene);
+    }
+
 }
