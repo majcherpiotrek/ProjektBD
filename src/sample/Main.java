@@ -36,6 +36,7 @@ public class Main extends Application {
     private Button rankingButton;
     private Button eventsListButton;
     private Button sailorListButton;
+    private Button adminLoginButton;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -89,6 +90,13 @@ public class Main extends Application {
             }
         });
 
+        adminLoginButton = new Button("Logowanie administratora");
+        adminLoginButton.setOnAction(e ->{
+            Boolean isLoggedIn = false;
+            isLoggedIn = LoginWindow.Display(dbConnection);
+            System.out.println(isLoggedIn);
+        });
+
         TableView<Sailor> rankingTableView = new TableView<>();
         try{
             ObservableList<Sailor> sailorObservableList = SeasonRanking.getSailorsObservableList(dbConnection, genderChoiceBox.getValue(), seasonChoiceBox.getValue());
@@ -108,6 +116,7 @@ public class Main extends Application {
         layout.add(eventsListButton,3,0);
         layout.add(sailorListButton, 4,0);
         layout.add(rankingTableView,0,1,5,1);
+        layout.add(adminLoginButton, 0, 2);
 
 
         mainScene = new Scene(layout);
@@ -119,6 +128,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
     private void initStandardLayout(GridPane layoutToInit){
         layoutToInit.setPadding(new Insets(10,10,10,10));
         layoutToInit.setHgap(8);
@@ -128,6 +138,7 @@ public class Main extends Application {
         layoutToInit.add(rankingButton,2,0);
         layoutToInit.add(eventsListButton,3,0);
         layoutToInit.add(sailorListButton, 4,0);
+        layoutToInit.add(adminLoginButton, 0, 2);
     }
 
     private void setAllCompetitorsListLayout() throws Exception{
