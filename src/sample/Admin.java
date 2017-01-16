@@ -1,6 +1,7 @@
 package sample;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
@@ -19,9 +20,23 @@ class Admin {
         return false;
     }
 
-    public Boolean addSailor(/*kolumny tabeli zawodnicy*/){
+    public void addSailor(Integer sailNumber, String name, String surname, String sex, String nationality, String boardBrand, String sailBrand, String sponsors) throws SQLException{
 
-        return false;
+        statement = connection.createStatement();
+        String update = "";
+        update += "INSERT INTO zawodnicy(nr_rejestracyjny, imie, nazwisko," +
+                "plec, narodowosc, marka_desek, marka_zagli, sponsorzy) values (\'";
+        update += sailNumber + "\',";
+        update += "\'"+name+"\',";
+        update += "\'"+surname+"\',";
+        update += "\'"+sex+"\',";
+        update += "\'"+nationality+"\',";
+        update += "\'"+boardBrand+"\',";
+        update += "\'"+sailBrand+"\',";
+        update += "\'"+sponsors+"\');";
+
+        statement.executeUpdate(update);
+        System.out.println("Update successfull");
     }
 
     public Boolean addEvent(/*kolumny tabeli zawody*/){

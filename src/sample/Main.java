@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import sample.enumerations.Gender;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 
 /*TODO
@@ -149,6 +150,7 @@ public class Main extends Application {
     private void setSeasonRankingScene(Stage parentWindow) throws Exception{
 
     }
+
     private void setAllCompetitorsListLayout(Stage parentWindow) throws Exception{
 
         GridPane allCompetitorsLayout = new GridPane();
@@ -188,9 +190,14 @@ public class Main extends Application {
     private void setAdminInterfaceScene(Scene parentScene, Stage parentWindow){
         Button back = new Button("back");
         back.setOnAction(e->{
+           /* try{
+                Admin admin = new Admin(dbConnection);
+                admin.addSailor(123,"piotrek","majcher","M","polska","pulsboards","severne","dakine,caas");
+            }catch(SQLException ex){
+                AlertBox.Display("update failed", ex.getMessage());
+            }*/
             parentWindow.setScene(parentScene);
         });
-
         VBox vBox = new VBox();
         vBox.getChildren().addAll(back);
         Scene scene = new Scene(vBox);
