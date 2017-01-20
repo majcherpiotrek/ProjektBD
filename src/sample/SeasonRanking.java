@@ -20,7 +20,7 @@ public class SeasonRanking {
 
         String genderStringInDB = (gender.equals(Gender.MALE)) ? "M" : "K";
 
-        String query = "SELECT * FROM ranking_sezonu WHERE sezon='"+ season.toString() +"' ORDER BY suma_punktow_rankingowych DESC;";
+        String query = "SELECT * FROM ranking_sezonu WHERE sezon_sezon='"+ season.toString() +"' ORDER BY suma_punktow_rankingowych DESC;";
         Statement statement = dbConnection.createStatement();
         ResultSet resultSetSeason = statement.executeQuery(query);
 

@@ -19,7 +19,7 @@ public class EventsInSeason {
     public static ObservableList<WindsurfingEvent> getEventsObservableList(Connection dbConnection, Integer season) throws Exception{
         ObservableList<WindsurfingEvent> eventsObservableList = FXCollections.observableArrayList();
 
-        String query = "SELECT * FROM zawody WHERE sezon='"+ season.toString() +"' ORDER BY data DESC;";
+        String query = "SELECT * FROM zawody WHERE sezon_sezon='"+ season.toString() +"' ORDER BY data DESC;";
         Statement statement = dbConnection.createStatement();
         ResultSet resultSetEvents = statement.executeQuery(query);
 
@@ -35,7 +35,7 @@ public class EventsInSeason {
                     resultSetEvents.getString("miejsce_rozegrania"),
                     resultSetEvents.getString("data"),
                     resultSetEvents.getInt("pula_nagrod"),
-                    resultSetEvents.getInt("sezon"));
+                    resultSetEvents.getInt("sezon_sezon"));
             eventsObservableList.add(windsurfingEvent);
         }
 
