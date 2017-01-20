@@ -15,8 +15,8 @@ import java.sql.Statement;
 /**
  * Created by piotrek on 12.01.17.
  */
-class EventsInSeason {
-    static ObservableList<WindsurfingEvent> getEventsObservableList(Connection dbConnection, Integer season) throws Exception{
+public class EventsInSeason {
+    public static ObservableList<WindsurfingEvent> getEventsObservableList(Connection dbConnection, Integer season) throws Exception{
         ObservableList<WindsurfingEvent> eventsObservableList = FXCollections.observableArrayList();
 
         String query = "SELECT * FROM zawody WHERE sezon='"+ season.toString() +"' ORDER BY data DESC;";
@@ -42,7 +42,7 @@ class EventsInSeason {
         return eventsObservableList;
     }
 
-    static TableView<WindsurfingEvent> createEventsInSeasonTableView(ObservableList<WindsurfingEvent> eventsObservableList){
+    public static TableView<WindsurfingEvent> createEventsInSeasonTableView(ObservableList<WindsurfingEvent> eventsObservableList){
         TableColumn<WindsurfingEvent, Integer> eventIDColumn = new TableColumn<>("ID zawodów");
         eventIDColumn.setMinWidth(200);
         eventIDColumn.setCellValueFactory(new PropertyValueFactory<>("eventID"));

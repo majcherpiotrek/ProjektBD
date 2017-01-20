@@ -14,8 +14,8 @@ import java.sql.Statement;
 /**
  * Created by piotrek on 12.01.17.
  */
-class AllCompetitorsList {
-    static ObservableList<Sailor> getSailorsObservableList(Connection dbConnection) throws Exception {
+public class AllCompetitorsList {
+    public static ObservableList<Sailor> getSailorsObservableList(Connection dbConnection) throws Exception {
         ObservableList<Sailor> sailorsObservableList = FXCollections.observableArrayList();
 
         String query = "SELECT * FROM zawodnicy ORDER BY nazwisko ASC;";
@@ -37,7 +37,7 @@ class AllCompetitorsList {
         return sailorsObservableList;
     }
 
-    static TableView<Sailor> createAllCompetitorsTableView(ObservableList<Sailor> sailorsObservableList){
+    public static TableView<Sailor> createAllCompetitorsTableView(ObservableList<Sailor> sailorsObservableList){
         TableColumn<Sailor, String> surnameColumn = new TableColumn<>("Nazwisko");
         surnameColumn.setMinWidth(200);
         surnameColumn.setCellValueFactory(new PropertyValueFactory<>("surname"));

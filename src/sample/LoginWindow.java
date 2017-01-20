@@ -19,9 +19,9 @@ import java.sql.Statement;
 /**
  * Created by piotrek on 12.01.17.
  */
-class LoginWindow {
+public class LoginWindow {
     private static Boolean returnValue = false;
-    static Boolean Display(Connection dbConnection){
+    public static Boolean Display(Connection dbConnection){
         Stage loginWindow = new Stage();
         loginWindow.initModality(Modality.APPLICATION_MODAL);
         loginWindow.setTitle("Logowanie");

@@ -20,7 +20,10 @@ class Admin {
         return false;
     }
 
-    public void addSailor(Integer sailNumber, String name, String surname, String sex, String nationality, String boardBrand, String sailBrand, String sponsors) throws SQLException{
+    void addSailor(Integer sailNumber, String name,
+                          String surname, String sex,
+                          String nationality, String boardBrand,
+                          String sailBrand, String sponsors) throws SQLException{
 
         statement = connection.createStatement();
         String update = "";

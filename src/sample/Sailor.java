@@ -4,6 +4,40 @@ package sample;
  * Created by piotrek on 11.01.17.
  */
 public class Sailor {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Sailor sailor = (Sailor) o;
+
+        if (placeInTable != null ? !placeInTable.equals(sailor.placeInTable) : sailor.placeInTable != null)
+            return false;
+        if (sailNumber != null ? !sailNumber.equals(sailor.sailNumber) : sailor.sailNumber != null) return false;
+        if (name != null ? !name.equals(sailor.name) : sailor.name != null) return false;
+        if (surname != null ? !surname.equals(sailor.surname) : sailor.surname != null) return false;
+        if (sex != null ? !sex.equals(sailor.sex) : sailor.sex != null) return false;
+        if (nationality != null ? !nationality.equals(sailor.nationality) : sailor.nationality != null) return false;
+        if (boardBrand != null ? !boardBrand.equals(sailor.boardBrand) : sailor.boardBrand != null) return false;
+        if (sailBrand != null ? !sailBrand.equals(sailor.sailBrand) : sailor.sailBrand != null) return false;
+        if (sponsors != null ? !sponsors.equals(sailor.sponsors) : sailor.sponsors != null) return false;
+        return seasonPoints != null ? seasonPoints.equals(sailor.seasonPoints) : sailor.seasonPoints == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = placeInTable != null ? placeInTable.hashCode() : 0;
+        result = 31 * result + (sailNumber != null ? sailNumber.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (surname != null ? surname.hashCode() : 0);
+        result = 31 * result + (sex != null ? sex.hashCode() : 0);
+        result = 31 * result + (nationality != null ? nationality.hashCode() : 0);
+        result = 31 * result + (boardBrand != null ? boardBrand.hashCode() : 0);
+        result = 31 * result + (sailBrand != null ? sailBrand.hashCode() : 0);
+        result = 31 * result + (sponsors != null ? sponsors.hashCode() : 0);
+        result = 31 * result + (seasonPoints != null ? seasonPoints.hashCode() : 0);
+        return result;
+    }
 
     private Integer placeInTable;
     private String sailNumber;
