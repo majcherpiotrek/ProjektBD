@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import sample.enumerations.Gender;
 
 
 import java.sql.Connection;
@@ -46,6 +47,10 @@ public class AllCompetitorsList {
         nameColumn.setMinWidth(200);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
+        TableColumn<Sailor, String> genderColumn = new TableColumn<>("Płeć");
+        genderColumn.setMaxWidth(50);
+        genderColumn.setCellValueFactory(new PropertyValueFactory<Sailor, String>("sex"));
+
         TableColumn<Sailor, String> sailNumberColumn = new TableColumn<>("Nr rejestracyjny");
         sailNumberColumn.setMinWidth(200);
         sailNumberColumn.setCellValueFactory(new PropertyValueFactory<>("sailNumber"));
@@ -57,7 +62,7 @@ public class AllCompetitorsList {
 
         TableView<Sailor> rankingTableView = new TableView<>();
         rankingTableView.setItems(sailorsObservableList);
-        rankingTableView.getColumns().addAll(surnameColumn, nameColumn, sailNumberColumn, nationalityColumn );
+        rankingTableView.getColumns().addAll(surnameColumn, nameColumn, genderColumn, sailNumberColumn, nationalityColumn );
 
         return rankingTableView;
     }

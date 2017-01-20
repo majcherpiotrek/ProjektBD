@@ -7,11 +7,11 @@ import java.sql.Statement;
 /**
  * Created by piotrek on 12.01.17.
  */
-class Admin {
+public class Admin {
     private Connection connection;
     private Statement statement;
 
-    Admin(Connection dbConnection){
+    public Admin(Connection dbConnection){
         connection = dbConnection;
     }
 
@@ -20,7 +20,7 @@ class Admin {
         return false;
     }
 
-    void addSailor(Integer sailNumber, String name,
+    public void addSailor(Integer sailNumber, String name,
                           String surname, String sex,
                           String nationality, String boardBrand,
                           String sailBrand, String sponsors) throws SQLException{
@@ -42,6 +42,12 @@ class Admin {
         System.out.println("Update successfull");
     }
 
+    public void removeSailor(String sailNumber) throws SQLException {
+        statement = connection.createStatement();
+        String update = "DELETE FROM zawodnicy WHERE nr_rejestracyjny=" + sailNumber + ";";
+
+        statement.executeUpdate(update);
+    }
     public Boolean addEvent(/*kolumny tabeli zawody*/){
 
         return false;

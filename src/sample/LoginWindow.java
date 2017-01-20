@@ -26,6 +26,11 @@ public class LoginWindow {
         loginWindow.initModality(Modality.APPLICATION_MODAL);
         loginWindow.setTitle("Logowanie");
         loginWindow.resizableProperty().setValue(false);
+        loginWindow.setOnCloseRequest(e -> {
+            e.consume();
+            returnValue = false;
+            loginWindow.close();
+        });
 
 
         Label message = new Label("Aby zalogować się jako administrator\nmusisz podać login oraz hasło.");
