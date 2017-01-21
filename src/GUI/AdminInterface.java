@@ -40,6 +40,7 @@ public class AdminInterface {
         addSailorButton.setMinWidth(140);
         addSailorButton.setPadding(new Insets(2,2,2,2));
         addSailorButton.setOnAction(e->showAddSailorWindow(scene));
+        
         //Przycisk usuni臋cia zawodnika
         Button removeSailorButton = new Button("Usu艅 zawodnika");
         removeSailorButton.setMinWidth(140);
@@ -51,6 +52,7 @@ public class AdminInterface {
                 AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawodnik贸w!");
             }
         });
+        
         //Przycisk dodawania zawod贸w
         Button addEventButton = new Button("Dodaj zawody");
         addEventButton.setMinWidth(140);
@@ -58,10 +60,20 @@ public class AdminInterface {
         addEventButton.setOnAction(e->{
                 showAddEventWindow(scene);
         });
+        
         //Przycisk usuwania zawod贸w
         Button removeEventButton = new Button("Usu艅 zawody");
         removeEventButton.setMinWidth(140);
         removeEventButton.setPadding(new Insets(2,2,2,2));
+        removeEventButton.setOnAction(e->{
+        	try {
+        		showRemoveEventWindow(scene);
+
+        	}catch (Exception ex){
+        		AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawod體!");
+               }
+            });
+        
         //Przycisk dodania wynik贸w zawod贸w
         Button addEventResultsButton = new Button("Dodaj wyniki zawod贸w");
         addEventResultsButton.setMinWidth(140);
@@ -73,10 +85,20 @@ public class AdminInterface {
                 AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawod贸w!");
             }
         });
-        //Przycisk usuwania wynik贸w zawod贸w
-        Button removeEventResultsButton = new Button("Usu艅 wyniki zawod贸w");
+        
+        //Przycisk usuwania wynik體
+        Button removeEventResultsButton = new Button("Usu艅 wyniki zawod體");
         removeEventResultsButton.setMinWidth(140);
         removeEventResultsButton.setPadding(new Insets(2,2,2,2));
+        removeEventResultsButton.setOnAction(e->{
+        	try {
+        		showRemoveEventsResultsWindow(scene);
+
+        	}catch (Exception ex){
+        		AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawod體!");
+               }
+            });
+        
         //Przycisk dodawania administratora
         Button addAdminButton = new Button("Dodaj administrtora");
         addAdminButton.setMinWidth(140);
@@ -84,6 +106,7 @@ public class AdminInterface {
         addAdminButton.setOnAction(e->{
                 showAddAdminWindow(scene);
         });
+        
         //Przycisk usuwania administratora
         Button removeAdminButton = new Button("Usu艅 administratora");
         removeAdminButton.setMinWidth(140);
@@ -96,6 +119,7 @@ public class AdminInterface {
         layout.setHgap(15);
         layout.setVgap(8);
         layout.setPadding(new Insets(10,10,10,10));
+        
         //Przyciski dodawania/usuwania zawodnika
         layout.add(addSailorButton, 0,0);
         layout.add(removeSailorButton,0,1);
@@ -113,7 +137,11 @@ public class AdminInterface {
         adminWindow.show();
     }
 
-    private void showAddSailorWindow(Scene parentScene){
+
+
+
+
+	private void showAddSailorWindow(Scene parentScene){
 
         Button returnButton = new Button("Powr贸t");
         returnButton.setOnAction(e-> adminWindow.setScene(parentScene));
@@ -580,4 +608,119 @@ public class AdminInterface {
         window.setScene(scene);
         window.showAndWait();
     }
+    
+    
+    private void showRemoveEventWindow(Scene parentScene) throws Exception{
+    	 //Zainicjowanie listy sezon贸w
+        ArrayList<Integer> allSeasons;
+        try {
+            allSeasons = Seasons.getAllSeasons(dbConnection);
+        } catch (SQLException ex) {
+            AlertBox.Display("B艂膮d po艂膮czenia!", ex.getMessage());
+            return;
+        }
+        //ChoiceBox do wyboru sezonu
+        ChoiceBox<Integer> seasonChoiceBox = new ChoiceBox<>();
+        for (Integer season : allSeasons)
+            seasonChoiceBox.getItems().add(season);
+        seasonChoiceBox.setValue(seasonChoiceBox.getItems().get(0)); // najnowszy sezon
+
+    	
+    	
+        ObservableList<WindsurfingEvent> eventsObservableList = EventsInSeason.getEventsObservableList(dbConnection, seasonChoiceBox.getValue());
+        TableView<WindsurfingEvent> eventsTableView = EventsInSeason.createEventsInSeasonTableView(eventsObservableList);
+
+        Label chooseEventLabel = new Label("Wybierz zawody do usuni臋cia:");
+        chooseEventLabel.setPadding(new Insets(5,5,5,5));
+        Label errorLabel = new Label();
+
+        Button returnButton = new Button("Powr贸t");
+        returnButton.setPadding(new Insets(5,5,5,5));
+        returnButton.setOnAction(e->adminWindow.setScene(parentScene));
+
+        Button removeEventButton = new Button("Usu艅");
+        removeEventButton.setPadding(new Insets(5,5,5,5));
+        removeEventButton.setOnAction(e->{
+            WindsurfingEvent eventToRemove = eventsTableView.getSelectionModel().getSelectedItem();
+            try{
+                Admin admin = new Admin(dbConnection);
+                admin.removeEvent(eventToRemove.getEventID());
+                errorLabel.setTextFill(Color.GREEN);
+                errorLabel.setText("Usunieto zawody: " + eventToRemove.getEventID()+ " " + eventToRemove.getName() + " " + eventToRemove.getSeason());
+                eventsObservableList.removeAll(eventToRemove);
+                eventsTableView.refresh();
+            }catch (Exception ex){
+                errorLabel.setTextFill(Color.RED);
+                errorLabel.setText("Nie uda艂o si臋 wykona膰 operacji usuwania!");
+            }
+        });
+
+        VBox layout = new VBox();
+        layout.setSpacing(10);
+        HBox buttonsLayout = new HBox();
+        buttonsLayout.setSpacing(20);
+        buttonsLayout.getChildren().addAll(returnButton,removeEventButton);
+
+        layout.getChildren().addAll(chooseEventLabel,eventsTableView,errorLabel,buttonsLayout);
+
+        Scene scene = new Scene(layout);
+        adminWindow.setScene(scene);
+    }
+    
+    private void showRemoveEventsResultsWindow(Scene parentScene) throws Exception{
+   	 //Zainicjowanie listy sezon贸w
+       ArrayList<Integer> allSeasons;
+       try {
+           allSeasons = Seasons.getAllSeasons(dbConnection);
+       } catch (SQLException ex) {
+           AlertBox.Display("B艂膮d po艂膮czenia!", ex.getMessage());
+           return;
+       }
+       //ChoiceBox do wyboru sezonu
+       ChoiceBox<Integer> seasonChoiceBox = new ChoiceBox<>();
+       for (Integer season : allSeasons)
+           seasonChoiceBox.getItems().add(season);
+       seasonChoiceBox.setValue(seasonChoiceBox.getItems().get(0)); // najnowszy sezon
+
+   	
+   	
+       ObservableList<WindsurfingEvent> eventsObservableList = EventsInSeason.getEventsObservableList(dbConnection, seasonChoiceBox.getValue());
+       TableView<WindsurfingEvent> eventsTableView = EventsInSeason.createEventsInSeasonTableView(eventsObservableList);
+
+       Label chooseEventLabel = new Label("Wybierz zawody, kt髍ych wyniki usun规:");
+       chooseEventLabel.setPadding(new Insets(5,5,5,5));
+       Label errorLabel = new Label();
+
+       Button returnButton = new Button("Powr贸t");
+       returnButton.setPadding(new Insets(5,5,5,5));
+       returnButton.setOnAction(e->adminWindow.setScene(parentScene));
+
+       Button removeEventButton = new Button("Usu艅");
+       removeEventButton.setPadding(new Insets(5,5,5,5));
+       removeEventButton.setOnAction(e->{
+           WindsurfingEvent eventToRemove = eventsTableView.getSelectionModel().getSelectedItem();
+           try{
+               Admin admin = new Admin(dbConnection);
+               admin.removeEventsResults(eventToRemove.getEventID());
+               errorLabel.setTextFill(Color.GREEN);
+               errorLabel.setText("Usunieto wyniki zawodow: " + eventToRemove.getEventID()+ " " + eventToRemove.getName() + " " + eventToRemove.getSeason());
+               //eventsObservableList.removeAll(eventToRemove);
+               eventsTableView.refresh();
+           }catch (Exception ex){
+               errorLabel.setTextFill(Color.RED);
+               errorLabel.setText("Nie uda艂o si臋 wykona膰 operacji usuwania!");
+           }
+       });
+
+       VBox layout = new VBox();
+       layout.setSpacing(10);
+       HBox buttonsLayout = new HBox();
+       buttonsLayout.setSpacing(20);
+       buttonsLayout.getChildren().addAll(returnButton,removeEventButton);
+
+       layout.getChildren().addAll(chooseEventLabel,eventsTableView,errorLabel,buttonsLayout);
+
+       Scene scene = new Scene(layout);
+       adminWindow.setScene(scene);
+   }
 }

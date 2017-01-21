@@ -75,6 +75,20 @@ public class Admin {
         statement.executeUpdate(update);
         System.out.println("Update successfull");
     }
+    
+    public void removeEvent(Integer eventID) throws SQLException {
+        statement = connection.createStatement();
+        String update = "DELETE FROM zawody WHERE id_zawody=" + eventID + ";";
+
+        statement.executeUpdate(update);
+    }
+    
+    public void removeEventsResults(Integer eventID) throws SQLException {
+        statement = connection.createStatement();
+        String update = "DELETE FROM wyniki_zawodow WHERE id_zawody=" + eventID + ";";
+
+        statement.executeUpdate(update);
+    }
 
     public void addEventResults(Integer eventID, Integer sailorID, Integer singleEliminationResult, Integer doubleEliminationResult, Integer rankingPoints, Integer season) throws SQLException {
         /*
@@ -94,4 +108,5 @@ values((select id_zawody from zawody where id_zawody = 12016),(select nr_rejestr
         statement.executeUpdate(update);
         System.out.println("Update successfull");
     }
+
 }
