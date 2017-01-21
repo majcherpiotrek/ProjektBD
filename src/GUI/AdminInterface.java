@@ -8,15 +8,14 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import sample.Admin;
-import sample.AlertBox;
-import sample.AllCompetitorsList;
-import sample.Sailor;
+import sample.*;
 import sample.enumerations.Gender;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * Klasa wyświetlająca GUI administratora
@@ -26,6 +25,7 @@ public class AdminInterface {
     private Stage adminWindow;
     private Connection dbConnection;
     private Scene scene;
+    TableView<WindsurfingEvent> eventsTableView;
 
     public AdminInterface(Connection connection) {
         this.adminWindow = new Stage();
@@ -66,6 +66,13 @@ public class AdminInterface {
         Button addEventResultsButton = new Button("Dodaj wyniki zawodów");
         addEventResultsButton.setMinWidth(140);
         addEventResultsButton.setPadding(new Insets(2,2,2,2));
+        addEventResultsButton.setOnAction(e->{
+            try {
+                showAddResultsWindow(scene);
+            }catch (Exception ex){
+                AlertBox.Display("Błąd", "Nie udało się załadować listy zawodów!");
+            }
+        });
         //Przycisk usuwania wyników zawodów
         Button removeEventResultsButton = new Button("Usuń wyniki zawodów");
         removeEventResultsButton.setMinWidth(140);
@@ -438,5 +445,106 @@ public class AdminInterface {
 
         Scene scene = new Scene(layout);
         adminWindow.setScene(scene);
+    }
+
+    private void showAddResultsWindow(Scene parentScene) throws Exception {
+        //Zainicjowanie listy sezonów
+        ArrayList<Integer> allSeasons;
+        try {
+            allSeasons = Seasons.getAllSeasons(dbConnection);
+        } catch (SQLException ex) {
+            AlertBox.Display("Błąd połączenia!", ex.getMessage());
+            return;
+        }
+        //ChoiceBox do wyboru sezonu
+        ChoiceBox<Integer> seasonChoiceBox = new ChoiceBox<>();
+        for (Integer season : allSeasons)
+            seasonChoiceBox.getItems().add(season);
+        seasonChoiceBox.setValue(seasonChoiceBox.getItems().get(0)); // najnowszy sezon
+
+        ObservableList<WindsurfingEvent> eventsInSeasonObservableList = EventsInSeason.getEventsObservableList(dbConnection, seasonChoiceBox.getValue());
+        eventsTableView = EventsInSeason.createEventsInSeasonTableView(eventsInSeasonObservableList);
+
+        Button returnButton = new Button("Powrót");
+        returnButton.setOnAction(e->adminWindow.setScene(parentScene));
+
+        Button addResultsButton = new Button("Dodaj wyniki");
+        addResultsButton.setOnAction(e->{
+            try {
+                showAddResultsChooseSailorWindow(eventsTableView.getSelectionModel().getSelectedItem().getEventID(), seasonChoiceBox.getValue());
+            } catch (Exception ex) {
+                AlertBox.Display("Błąd", "Nie udało się załadować listy zawodników");
+            }
+        });
+
+        VBox layout = new VBox();
+        Button refershEventsTableViewButton = new Button("Odśwież listę zawodów");
+        refershEventsTableViewButton.setOnAction(e->{
+            try {
+                layout.getChildren().remove(eventsTableView);
+                ObservableList<WindsurfingEvent> eventsList = EventsInSeason.getEventsObservableList(dbConnection, seasonChoiceBox.getValue());
+                eventsTableView = EventsInSeason.createEventsInSeasonTableView(eventsList);
+                layout.getChildren().add(eventsTableView);
+            }catch (Exception ex){
+                AlertBox.Display("Błąd", "Nie udało się załadować listy zawodów!");
+            }
+        });
+
+
+        layout.setSpacing(10);
+        HBox buttonsLayout = new HBox();
+        buttonsLayout.setSpacing(20);
+
+        buttonsLayout.getChildren().addAll(returnButton,addResultsButton);
+
+        layout.getChildren().addAll(seasonChoiceBox,refershEventsTableViewButton,buttonsLayout,eventsTableView);
+
+        Scene scene = new Scene(layout);
+        adminWindow.setScene(scene);
+    }
+
+    private void showAddResultsChooseSailorWindow(Integer eventID, Integer season) throws Exception {
+        Stage window = new Stage();
+        window.initModality(Modality.APPLICATION_MODAL);
+        window.setTitle("Wybierz zawodnika do dodania wyniku");
+        window.setResizable(false);
+
+        ObservableList<Sailor> allCompetitorsObservableList = AllCompetitorsList.getSailorsObservableList(dbConnection);
+        TableView<Sailor> allSailorsTableView = AllCompetitorsList.createAllCompetitorsTableView(allCompetitorsObservableList);
+
+        Label singleEliminationResultLabel = new Label("Miejsce w pojedynczej eliminacji:");
+        Label doubleEliminationResultLabel = new Label("Miejsce w podwójnej eliminacji:");
+        Label rankingPointsLabel = new Label("Zdobyte punkty rankingowe:");
+        Label errorLabel = new Label();
+
+        TextField singleEliminationReultTextField = new TextField();
+        TextField doubleEliminationResultTextField = new TextField();
+        TextField rankingPointsTextField = new TextField();
+
+
+        Button addResultButton = new Button("Dodaj wynik");
+        addResultButton.setOnAction(e->{
+            
+        });
+
+        GridPane layout = new GridPane();
+
+        layout.add(allSailorsTableView,0,0,2,1);
+
+        layout.add(singleEliminationResultLabel,0,1);
+        layout.add(singleEliminationReultTextField,1,1);
+
+        layout.add(doubleEliminationResultLabel,0,2);
+        layout.add(doubleEliminationResultTextField,1,2);
+
+        layout.add(rankingPointsLabel,0,3);
+        layout.add(rankingPointsTextField,1,3);
+
+        layout.add(errorLabel,0,4,2,1);
+        layout.add(addResultButton,0,5);
+
+        Scene scene = new Scene(layout);
+        window.setScene(scene);
+        window.showAndWait();
     }
 }

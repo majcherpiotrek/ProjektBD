@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
+ * Klasa wykonująca funkcje administatora na bazie danych
  * Created by piotrek on 12.01.17.
  */
 public class Admin {
@@ -70,6 +71,25 @@ public class Admin {
         update += "\'"+date+"\',";
         update += "\'"+prizeMoney+"\',";
         update += "\'"+season+"\');";
+
+        statement.executeUpdate(update);
+        System.out.println("Update successfull");
+    }
+
+    public void addEventResults(Integer eventID, Integer sailorID, Integer singleEliminationResult, Integer doubleEliminationResult, Integer rankingPoints, Integer season) throws SQLException {
+        /*
+        insert into wyniki_zawodow(id_zawody, nr_rejestracyjny,miejsce_pojedyncza_eliminacja, miejsce_podwojna_eliminacja, zdobyte_punkty_rankingowe,sezon_sezon)
+values((select id_zawody from zawody where id_zawody = 12016),(select nr_rejestracyjny from zawodnicy where nr_rejestracyjny=101), 3,3,75,(select sezon_sezon from zawody where id_zawody=12016));
+         */
+        statement = connection.createStatement();
+        String update = "";
+        update +="INSERT INTO wyniki_zawodow(id_zawody, nr_rejestracyjny,miejsce_pojedyncza_eliminacja, miejsce_podwojna_eliminacja, zdobyte_punkty_rankingowe,sezon_sezon) VALUES(";
+        update += "(SELECT id_zawody FROM zawody WHERE id_zawody="+eventID+"),";
+        update += "(SELECT nr_rejestracyjny FROM zawodnicy WHERE nr_rejestracyjny="+sailorID+"),";
+        update += singleEliminationResult+",";
+        update += doubleEliminationResult+",";
+        update += rankingPoints + ",";
+        update += "(SELECT sezon_sezon FROM zawody WHERE id_zawody="+eventID+"));";
 
         statement.executeUpdate(update);
         System.out.println("Update successfull");
