@@ -524,7 +524,40 @@ public class AdminInterface {
 
         Button addResultButton = new Button("Dodaj wynik");
         addResultButton.setOnAction(e->{
-            
+           // (Integer eventID, Integer sailorID, Integer singleEliminationResult, Integer doubleEliminationResult, Integer rankingPoints, Integer season)
+             String sailNumberString = allSailorsTableView.getSelectionModel().getSelectedItem().getSailNumber();
+             String singleElimResString = singleEliminationReultTextField.getText();
+             String doubleElimReString = doubleEliminationResultTextField.getText();
+             String rankingPointsString = rankingPointsTextField.getText();
+
+             Integer sailNumber;
+             Integer singleResult;
+             Integer doubleResult;
+             Integer rankingPoints;
+            try{
+                sailNumber = Integer.parseInt(sailNumberString);
+                singleResult = Integer.parseInt(singleElimResString);
+                doubleResult = Integer.parseInt(doubleElimReString);
+                rankingPoints = Integer.parseInt(rankingPointsString);
+                Admin admin = new Admin(dbConnection);
+                try{
+                    admin.addEventResults(eventID,
+                            sailNumber,
+                            singleResult,
+                            doubleResult,
+                            rankingPoints,
+                            season);
+
+                    errorLabel.setTextFill(Color.GREEN);
+                    errorLabel.setText("Dodawanie wyników zawodów zakończone powodzeniem!");
+                }catch (SQLException ex){
+                    errorLabel.setTextFill(Color.RED);
+                    errorLabel.setText("Nie udało się dodać wyników!\nSprawdź wprowadzone dane!");
+                }
+            }catch (NumberFormatException ex){
+                errorLabel.setTextFill(Color.RED);
+                errorLabel.setText("Podaj poprawne dane!");
+            }
         });
 
         GridPane layout = new GridPane();

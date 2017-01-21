@@ -12,22 +12,8 @@ import java.sql.DriverManager;
 
 
 /*TODO
--wrzucić buttony do funkcji ustawiających scenę zamiast globalnych
--trzeba zrobić tak, żeby dodanie wyników zawodów powodowało zaktualizowanie punktów w wynikach zawodów
--przy dodawaniu wyników zawodów sprawdzać, czy zawodnicy na liście istnieją w tabeli zawodników!
--ADMIN: dodawanie sezonu, dodawanie zawodów + wyników zawodów, dodawanie zawodników
--listenery do choiceboxów
--wyświetlanie profilu zawodnika po wybraniu go z listy
--wyświetlanie profilu zawodów lub wyników zawodów po wybraniu ich z listy
-
-PO ZROBIENIU DODAWANIA DANYCH PRZEZ ADMINA:
--dodać kobiety
--dodać kilka sezonów
-
-
-!!!!!!!!!!!!!!!!!!!!
-GUI nadal się wysypuje w pewnym momencie przy przeskakiwaniu między kartami.
-Naprawić gui i dodać panel administratora!!
+-wyświetlanie wyników konkretnych zawodów
+-wyświetlanie profili zawodników
  */
 public class Main extends Application {
 
