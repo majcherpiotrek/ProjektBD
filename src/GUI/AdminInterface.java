@@ -2,7 +2,6 @@ package GUI;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -20,6 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
+ * Klasa wyświetlająca GUI administratora
  * Created by piotrek on 20.01.17.
  */
 public class AdminInterface {
@@ -55,6 +55,9 @@ public class AdminInterface {
         Button addEventButton = new Button("Dodaj zawody");
         addEventButton.setMinWidth(140);
         addEventButton.setPadding(new Insets(2,2,2,2));
+        addEventButton.setOnAction(e->{
+                showAddEventWindow(scene);
+        });
         //Przycisk usuwania zawodów
         Button removeEventButton = new Button("Usuń zawody");
         removeEventButton.setMinWidth(140);
@@ -67,6 +70,20 @@ public class AdminInterface {
         Button removeEventResultsButton = new Button("Usuń wyniki zawodów");
         removeEventResultsButton.setMinWidth(140);
         removeEventResultsButton.setPadding(new Insets(2,2,2,2));
+        //Przycisk dodawania administratora
+        Button addAdminButton = new Button("Dodaj administrtora");
+        addAdminButton.setMinWidth(140);
+        addAdminButton.setPadding(new Insets(2,2,2,2));
+        addAdminButton.setOnAction(e->{
+                showAddAdminWindow(scene);
+        });
+        //Przycisk usuwania administratora
+        Button removeAdminButton = new Button("Usuń administratora");
+        removeAdminButton.setMinWidth(140);
+        removeAdminButton.setPadding(new Insets(2,2,2,2));
+        removeAdminButton.setOnAction(e->{
+            showRemoveAdminWindow(scene);
+        });
 
         GridPane layout = new GridPane();
         layout.setHgap(15);
@@ -81,7 +98,9 @@ public class AdminInterface {
         //Przyciski dodawania/usuwania wyników zawodów
         layout.add(addEventResultsButton,2,0);
         layout.add(removeEventResultsButton,2,1);
-
+        //Przyciski dodawania/usuwania administratora
+        layout.add(addAdminButton,3,0);
+        layout.add(removeAdminButton,3,1);
         scene = new Scene(layout);
         adminWindow.setScene(scene);
         adminWindow.show();
@@ -232,4 +251,192 @@ public class AdminInterface {
         adminWindow.setScene(scene);
     }
 
+    private void showAddEventWindow(Scene parentScene){
+        Button returnButton = new Button("Powrót");
+        returnButton.setOnAction(e-> adminWindow.setScene(parentScene));
+
+        //Etykiety pól wprowadzania danych
+        Label eventIdLabel = new Label("ID:");
+        Label eventNameLabel = new Label("Nazwa:");
+        Label eventLocationLabel = new Label("Miejsce rozegrania:");
+        Label eventDateLabel = new Label("Data (RRRR-MM-DD):");
+        Label eventPrizeMoneyLabel = new Label("Pula nagród:");
+        Label eventSeasonLabel = new Label("Sezon:");
+        Label errorLabel = new Label();
+
+        TextField eventIDTextField = new TextField();
+        TextField eventNameTextField = new TextField();
+        TextField eventLocationTextField = new TextField();
+        TextField eventDateTextField = new TextField();
+        TextField eventPrizeMoneyTextField = new TextField();
+        TextField eventSeasonTextField = new TextField();
+
+        Button confirmButton = new Button("Dodaj!");
+        confirmButton.setOnAction(e->{
+
+            String eventIDString = eventIDTextField.getText();
+            String eventNameString = eventNameTextField.getText();
+            String eventLocationString = eventLocationTextField.getText();
+            String eventDateString = eventDateTextField.getText();
+            String eventPrizeMoneyString = eventPrizeMoneyTextField.getText();
+            String eventSeasonString = eventSeasonTextField.getText();
+
+            Integer eventID;
+            Integer eventSeason;
+            Integer eventPrizeMoney;
+            try{
+                eventID = Integer.parseInt(eventIDString);
+                eventSeason = Integer.parseInt(eventSeasonString);
+                eventPrizeMoney = Integer.parseInt(eventPrizeMoneyString);
+                Admin admin = new Admin(dbConnection);
+                try{
+                    admin.addEvent(eventID,
+                            eventNameString,
+                            eventLocationString,
+                            eventDateString,
+                            eventPrizeMoney,
+                            eventSeason);
+                    errorLabel.setTextFill(Color.GREEN);
+                    errorLabel.setText("Dodawanie zawodów zakończone powodzeniem!");
+                }catch (SQLException ex){
+                    errorLabel.setTextFill(Color.RED);
+                    errorLabel.setText("Nie udało się dodać zawodów!\nSprawdź wprowadzone dane!");
+                }
+            }catch (NumberFormatException ex){
+                errorLabel.setTextFill(Color.RED);
+                errorLabel.setText("Podaj poprawne ID, pulę nagród oraz sezon");
+            }
+        });
+
+        GridPane layout = new GridPane();
+        layout.setPadding(new Insets(20,20,20,20));
+        layout.setVgap(5);
+        layout.setHgap(5);
+
+        layout.add(eventIdLabel,0,0);
+        layout.add(eventIDTextField,1,0);
+
+        layout.add(eventNameLabel,0,1);
+        layout.add(eventNameTextField,1,1);
+
+        layout.add(eventLocationLabel,0,2);
+        layout.add(eventLocationTextField,1,2);
+
+        layout.add(eventDateLabel, 0,3);
+        layout.add(eventDateTextField,1,3);
+
+        layout.add(eventPrizeMoneyLabel,0,4);
+        layout.add(eventPrizeMoneyTextField,1,4);
+
+        layout.add(eventSeasonLabel,0,5);
+        layout.add(eventSeasonTextField,1,5);
+
+        layout.add(errorLabel,0,6,2,1);
+
+        layout.add(returnButton,0,7);
+        layout.add(confirmButton,1,7);
+
+        Scene addSailorScene = new Scene(layout);
+        adminWindow.setScene(addSailorScene);
+    }
+
+    private void showAddAdminWindow(Scene parentScene){
+        Label loginLabel = new Label("Login:");
+        Label passLabel = new Label("Hasło:");
+        Label errorLabel = new Label();
+
+        TextField loginTextField = new TextField();
+        TextField passwordTextField = new TextField();
+
+        Button returnButton = new Button("Powrót");
+        returnButton.setOnAction(e->adminWindow.setScene(parentScene));
+
+        Button confirmButton = new Button("Dodaj administratora");
+        confirmButton.setOnAction(e->{
+            String login = loginTextField.getText();
+            String pass = passwordTextField.getText();
+
+            if(login.length() < 5 || pass.length() < 5){
+                errorLabel.setTextFill(Color.RED);
+                errorLabel.setText("Login i hasło muszą zawierać\nprzynajmniej 5 znaków!");
+            }else{
+                Admin admin = new Admin(dbConnection);
+                try{
+                    admin.addAdmin(login,pass);
+                    errorLabel.setTextFill(Color.GREEN);
+                    errorLabel.setText("Dodanie nowego konta administratora\nzakończone powodzeniem.");
+                }catch (SQLException ex){
+                    errorLabel.setTextFill(Color.RED);
+                    errorLabel.setText("Nie udało się dodać administratora.");
+                }
+            }
+        });
+
+       GridPane layout = new GridPane();
+       layout.setPadding(new Insets(20,20,20,20));
+       layout.setHgap(10);
+       layout.setVgap(10);
+
+       layout.add(loginLabel,0,0);
+       layout.add(loginTextField,1,0);
+
+       layout.add(passLabel,0,1);
+       layout.add(passwordTextField,1,1);
+
+       layout.add(errorLabel,0,2,2,1);
+
+       layout.add(returnButton,0,3);
+       layout.add(confirmButton,1,3);
+
+       Scene scene = new Scene(layout);
+       adminWindow.setScene(scene);
+    }
+
+    private void showRemoveAdminWindow(Scene parentScene){
+        Label loginLabel = new Label("Login:");
+        Label passLabel = new Label("Hasło:");
+        Label errorLabel = new Label();
+
+        TextField loginTextField = new TextField();
+        TextField passwordTextField = new TextField();
+
+        Button returnButton = new Button("Powrót");
+        returnButton.setOnAction(e->adminWindow.setScene(parentScene));
+
+        Button confirmButton = new Button("Usuń administratora");
+        confirmButton.setOnAction(e->{
+            String login = loginTextField.getText();
+            String pass = passwordTextField.getText();
+
+            Admin admin = new Admin(dbConnection);
+            try{
+                admin.removeAdmin(login,pass);
+                errorLabel.setTextFill(Color.GREEN);
+                errorLabel.setText("Usunięcie konta administratora\nzakończone powodzeniem.");
+            }catch (SQLException ex){
+                errorLabel.setTextFill(Color.RED);
+                errorLabel.setText("Błędne dane!");
+            }
+
+        });
+
+        GridPane layout = new GridPane();
+        layout.setPadding(new Insets(20,20,20,20));
+        layout.setHgap(10);
+        layout.setVgap(10);
+
+        layout.add(loginLabel,0,0);
+        layout.add(loginTextField,1,0);
+
+        layout.add(passLabel,0,1);
+        layout.add(passwordTextField,1,1);
+
+        layout.add(errorLabel,0,2,2,1);
+
+        layout.add(returnButton,0,3);
+        layout.add(confirmButton,1,3);
+
+        Scene scene = new Scene(layout);
+        adminWindow.setScene(scene);
+    }
 }

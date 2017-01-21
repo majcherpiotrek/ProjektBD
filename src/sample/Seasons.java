@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
+ * Klasa służąca do pobierania tabeli sezonów z bazy danych
  * Created by piotrek on 20.01.17.
  */
 public class Seasons {

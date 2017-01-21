@@ -59,7 +59,7 @@ public class GeneralInterface {
         ChoiceBox<Integer> seasonChoiceBox = new ChoiceBox<>();
         for (Integer season : allSeasons)
             seasonChoiceBox.getItems().add(season);
-        seasonChoiceBox.setValue(seasonChoiceBox.getItems().get(seasonChoiceBox.getItems().size() - 1)); // najnowszy sezon
+        seasonChoiceBox.setValue(seasonChoiceBox.getItems().get(0)); // najnowszy sezon
 
         //Zainicjowanie tabeli rankingu
         try {

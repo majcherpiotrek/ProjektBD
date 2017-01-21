@@ -15,11 +15,6 @@ public class Admin {
         connection = dbConnection;
     }
 
-    public Boolean addSeasonRanking(/*kolumny tabeli ranking sezonu*/){
-
-        return false;
-    }
-
     public void addSailor(Integer sailNumber, String name,
                           String surname, String sex,
                           String nationality, String boardBrand,
@@ -48,18 +43,35 @@ public class Admin {
 
         statement.executeUpdate(update);
     }
-    public Boolean addEvent(/*kolumny tabeli zawody*/){
 
-        return false;
+    public void addAdmin(String login, String password) throws SQLException {
+        statement = connection.createStatement();
+        String update = "INSERT INTO administratorzy(login,haslo) values(\""+login+"\",\""+password+"\");";
+        statement.executeUpdate(update);
+        System.out.println("Update successfull");
+
     }
 
-    public Boolean addEventResults(/*kolumny tabeli wyniki zawodów*/){
-
-        return false;
+    public void removeAdmin(String login, String password) throws SQLException {
+        statement = connection.createStatement();
+        String update = "DELETE FROM administratorzy WHERE login=\""+login+"\" AND haslo=\""+password+"\";";
+        statement.executeUpdate(update);
+        System.out.println("Update successfull");
     }
 
-    public Boolean addSeason(/*sezon*/){
+    public void addEvent(Integer eventID, String eventName, String eventLocation, String date, Integer prizeMoney, Integer season) throws SQLException {
+        statement = connection.createStatement();
+        String update = "";
+        update += "INSERT INTO zawody(id_zawody, nazwa_zawodow, miejsce_rozegrania," +
+                "data, pula_nagrod, sezon_sezon) values (\'";
+        update += eventID + "\',";
+        update += "\'"+eventName+"\',";
+        update += "\'"+eventLocation+"\',";
+        update += "\'"+date+"\',";
+        update += "\'"+prizeMoney+"\',";
+        update += "\'"+season+"\');";
 
-        return false;
+        statement.executeUpdate(update);
+        System.out.println("Update successfull");
     }
 }
