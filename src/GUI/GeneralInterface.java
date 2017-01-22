@@ -5,7 +5,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -13,7 +15,9 @@ import sample.*;
 import sample.enumerations.Gender;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
@@ -78,6 +82,16 @@ public class GeneralInterface {
                 adminGUI.Display();
             }
         });
+        Button showDetailsButton = new Button("Pokaż profil zawodnika");
+        showDetailsButton.setOnAction(e->{
+            try{
+                Sailor sailor = rankingTableView.getSelectionModel().getSelectedItem();
+                showSailorDetailsWindow(sailor);
+            }catch (Exception ex){
+                AlertBox.Display("Błąd","Musisz zaznaczyć zawodnika na liście!");
+            }
+        });
+
         //Przycisk wyświetlający listę zawodów w sezonie
         Button eventsListButton = new Button("Lista zawodów");
         eventsListButton.setOnAction(event -> {
@@ -87,6 +101,10 @@ public class GeneralInterface {
                 eventTableView = updateEventsTableView(seasonChoiceBox.getValue());
                 tableLayout.getChildren().add(eventTableView);
                 layout.add(tableLayout, 0, 1, 5, 1);
+                showDetailsButton.setText("Pokaż profil zawodow");
+                showDetailsButton.setOnAction(e->{
+
+                });
             } catch (Exception ex) {
                 AlertBox.Display("Błąd pobierania danych", ex.getMessage());
             }
@@ -100,6 +118,14 @@ public class GeneralInterface {
                 sailorsTableView = updateSailorsTableView();
                 tableLayout.getChildren().add(sailorsTableView);
                 layout.add(tableLayout, 0, 1, 5, 1);
+                showDetailsButton.setOnAction(ev->{
+                    try{
+                        Sailor sailor = sailorsTableView.getSelectionModel().getSelectedItem();
+                        showSailorDetailsWindow(sailor);
+                    }catch (Exception ex){
+                        AlertBox.Display("Błąd","Musisz zaznaczyć zawodnika na liście!");
+                    }
+                });
             } catch (Exception ex) {
                 AlertBox.Display("Błąd pobierania sezonów", ex.getMessage());
             }
@@ -113,10 +139,20 @@ public class GeneralInterface {
                 rankingTableView = updateRankingTableView(genderChoiceBox.getValue(), seasonChoiceBox.getValue());
                 tableLayout.getChildren().add(rankingTableView);
                 layout.add(tableLayout, 0, 1, 5, 1);
+                showDetailsButton.setOnAction(ev->{
+                    try{
+                        Sailor sailor = rankingTableView.getSelectionModel().getSelectedItem();
+                        showSailorDetailsWindow(sailor);
+                    }catch (Exception ex){
+                        AlertBox.Display("Błąd","Musisz zaznaczyć zawodnika na liście!");
+                    }
+                });
             } catch (Exception ex) {
                 AlertBox.Display("Błąd pobierania rankingu", ex.getMessage());
             }
         });
+
+
 
         //Layout
 
@@ -133,6 +169,7 @@ public class GeneralInterface {
         tableLayout.getChildren().add(rankingTableView);
         layout.add(tableLayout, 0, 1, 5, 1);
         layout.add(adminLoginButton, 0, 2);
+        layout.add(showDetailsButton, 1,2);
 
 
         mainScene = new Scene(layout);
@@ -153,5 +190,79 @@ public class GeneralInterface {
     private TableView<Sailor> updateSailorsTableView() throws Exception{
         ObservableList<Sailor> allCompetitorsObservableList = AllCompetitorsList.getSailorsObservableList(dbConnection);
        return (AllCompetitorsList.createAllCompetitorsTableView(allCompetitorsObservableList));
+    }
+
+    private void showSailorDetailsWindow(Sailor sailor) throws SQLException {
+        Stage sailorDetailsWindow = new Stage();
+        sailorDetailsWindow.setTitle("Profil zawodnika");
+        Label nameLabel = new Label("Imię: " + sailor.getName());
+        nameLabel.setPadding(new Insets(5,5,5,5));
+        Label surnameLabel = new Label("Nazwisko: " + sailor.getSurname());
+        surnameLabel.setPadding(new Insets(5,5,5,5));
+        Label nationalityLabel = new Label("Narodowość: " + sailor.getNationality());
+        nationalityLabel.setPadding(new Insets(5,5,5,5));
+        Label sailNumberLabel = new Label("Nr rejestracyjny: "+ sailor.getSailNumber());
+        sailNumberLabel.setPadding(new Insets(5,5,5,5));
+        Label sexLabel = new Label("Płeć: "+sailor.getSex());
+        sexLabel.setPadding(new Insets(5,5,5,5));
+        Label boardBrandLabel = new Label("Marka desek: " + sailor.getBoardBrand());
+        boardBrandLabel.setPadding(new Insets(5,5,5,5));
+        Label sailBrandLabel = new Label("Marka żagli: "+ sailor.getSailBrand());
+        sailBrandLabel.setPadding(new Insets(5,5,5,5));
+        Label sponsorsLabel = new Label("Sponsorzy: " + sailor.getSponsors());
+        sponsorsLabel.setPadding(new Insets(5,5,5,5));
+
+        //Pobranie wyników zawodnika w każdych zawodach
+        Statement statement = dbConnection.createStatement();
+        String query = "SELECT * FROM wyniki_zawodow WHERE nr_rejestracyjny="+sailor.getSailNumber()+" ORDER BY miejsce_podwojna_eliminacja DESC;";
+        ResultSet rS = statement.executeQuery(query);
+
+        ArrayList<Label> bestResultsLabels = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> resultsData = new ArrayList<>();
+        for (int i = 0; rS.next(); i++){
+            resultsData.add(new ArrayList<>());
+            resultsData.get(i).add(rS.getInt("id_zawody"));
+            resultsData.get(i).add(rS.getInt("miejsce_pojedyncza_eliminacja"));
+            resultsData.get(i).add(rS.getInt("miejsce_podwojna_eliminacja"));
+            resultsData.get(i).add( rS.getInt("zdobyte_punkty_rankingowe"));
+        }
+        for (int i=0; i < resultsData.size() && i<5; i++){
+            query = "SELECT * FROM zawody WHERE id_zawody="+resultsData.get(i).get(0)+";";
+            Integer single = resultsData.get(i).get(1);
+            Integer finalResult = resultsData.get(i).get(2);
+            Integer rankingPoints = resultsData.get(i).get(3);
+
+            ResultSet eventRS = statement.executeQuery(query);
+            while(eventRS.next()){
+                bestResultsLabels.add(new Label(eventRS.getString("nazwa_zawodow") + "\n"
+                        + "Sezon: " + eventRS.getInt("sezon_sezon") + "\n"
+                        +"Miejsce w pojedynczej eliminacji: "
+                        + single + "\n"
+                        + "Miejsce w całych zawodach: "
+                        + finalResult + "\n"
+                        + "Zdobyte punkty rankingowe: "
+                        + rankingPoints));
+            }
+        }
+
+        VBox bestResultsLayout = new VBox();
+        bestResultsLayout.setPadding(new Insets(10,10,10,10));
+        bestResultsLayout.setStyle("-fx-border-style: dotted");
+        Label title = new Label("Najlepsze wyniki zawodnika:");
+        title.setPadding(new Insets(5,5,5,5));
+        bestResultsLayout.getChildren().add(title);
+        for(Label label : bestResultsLabels) {
+            label.setStyle("-fx-border-style: dashed");
+            label.setPadding(new Insets(5,5,5,5));
+            bestResultsLayout.getChildren().add(label);
+        }
+
+        VBox layout = new VBox();
+        layout.getChildren().addAll(nameLabel,surnameLabel,nationalityLabel,sailNumberLabel,sexLabel,boardBrandLabel,sailBrandLabel,sponsorsLabel, bestResultsLayout);
+
+        Scene scene = new Scene(layout);
+
+        sailorDetailsWindow.setScene(scene);
+        sailorDetailsWindow.show();
     }
 }
