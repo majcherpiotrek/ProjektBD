@@ -103,7 +103,12 @@ public class GeneralInterface {
                 layout.add(tableLayout, 0, 1, 5, 1);
                 showDetailsButton.setText("Pokaż profil zawodow");
                 showDetailsButton.setOnAction(e->{
-
+                    WindsurfingEvent windsurfingEvent = eventTableView.getSelectionModel().getSelectedItem();
+                    try {
+                        showEventDetailsWindow(windsurfingEvent);
+                    }catch (Exception ex){
+                        AlertBox.Display("Błąd","Nie udało się załadować listy zawodów!");
+                    }
                 });
             } catch (Exception ex) {
                 AlertBox.Display("Błąd pobierania danych", ex.getMessage());
@@ -195,6 +200,8 @@ public class GeneralInterface {
     private void showSailorDetailsWindow(Sailor sailor) throws SQLException {
         Stage sailorDetailsWindow = new Stage();
         sailorDetailsWindow.setTitle("Profil zawodnika");
+        sailorDetailsWindow.setResizable(false);
+
         Label nameLabel = new Label("Imię: " + sailor.getName());
         nameLabel.setPadding(new Insets(5,5,5,5));
         Label surnameLabel = new Label("Nazwisko: " + sailor.getSurname());
@@ -264,5 +271,54 @@ public class GeneralInterface {
 
         sailorDetailsWindow.setScene(scene);
         sailorDetailsWindow.show();
+    }
+
+    private void showEventDetailsWindow(WindsurfingEvent windsurfingEvent) throws Exception {
+        Stage eventDetailsWindow = new Stage();
+        eventDetailsWindow.setTitle("Zakładka zawodów");
+        eventDetailsWindow.setResizable(false);
+
+       ObservableList<Sailor> eventResultsSingle = EventResults.getEventResultsObservableList(dbConnection,windsurfingEvent.getEventID(),true);
+       TableView<Sailor> eventResultsSingleTableView = EventResults.createEventResultsTableView(eventResultsSingle,true);
+
+       ObservableList<Sailor> eventResultsDouble = EventResults.getEventResultsObservableList(dbConnection,windsurfingEvent.getEventID(),false);
+       TableView<Sailor> eventResultsDoubleTableView = EventResults.createEventResultsTableView(eventResultsDouble,false);
+
+       eventResultsSingleTableView.setMaxHeight(200);
+       eventResultsDoubleTableView.setMaxHeight(200);
+
+       Label eventInfo = new Label(windsurfingEvent.getName()
+               + "\nMiejsce rozegrania: " + windsurfingEvent.getLocation()
+               + " Data rozegrania: " + windsurfingEvent.getDate()
+               + " Pula nagród: " + windsurfingEvent.getPrizeMoney());
+       eventInfo.setStyle("-fx-font-weight: bolder; -fx-border-style: dashed");
+       eventInfo.setPadding(new Insets(10,10,10,10));
+
+       Label singleElimLabel = new Label("Wyniki pojedynczej eliminacji:");
+       singleElimLabel.setPadding(new Insets(10,10,10,10));
+       singleElimLabel.setStyle("-fx-border-style: dashed");
+       Label doubleElimLabel = new Label("Wyniki podwójnej elminacji i całych zawodów: ");
+       doubleElimLabel.setPadding(new Insets(10,10,10,10));
+       doubleElimLabel.setStyle("-fx-border-style: dashed");
+
+       Button showSailorButton = new Button("Pokaż profil zawodnika (zaznacz w drugiej tabeli)");
+       showSailorButton.setOnAction(e->{
+           Sailor sailor = eventResultsDoubleTableView.getSelectionModel().getSelectedItem();
+           try {
+               showSailorDetailsWindow(sailor);
+           }catch (Exception ex){
+               AlertBox.Display("Błąd","Nie udało się pobrać profilu zawodnika");
+           }
+       });
+
+       VBox layout = new VBox();
+       layout.setSpacing(10);
+       layout.setPadding(new Insets(5,5,5,5));
+       layout.getChildren().addAll(eventInfo,singleElimLabel,eventResultsSingleTableView,doubleElimLabel,eventResultsDoubleTableView,showSailorButton);
+
+
+       Scene scene = new Scene(layout);
+       eventDetailsWindow.setScene(scene);
+       eventDetailsWindow.show();
     }
 }
