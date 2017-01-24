@@ -70,7 +70,7 @@ public class AdminInterface {
         		showRemoveEventWindow(scene);
 
         	}catch (Exception ex){
-        		AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawod體!");
+        		AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawod贸w!");
                }
             });
         
@@ -86,8 +86,8 @@ public class AdminInterface {
             }
         });
         
-        //Przycisk usuwania wynik體
-        Button removeEventResultsButton = new Button("Usu艅 wyniki zawod體");
+        //Przycisk usuwania wynik贸w
+        Button removeEventResultsButton = new Button("Usu艅 wyniki zawod贸w");
         removeEventResultsButton.setMinWidth(140);
         removeEventResultsButton.setPadding(new Insets(2,2,2,2));
         removeEventResultsButton.setOnAction(e->{
@@ -95,7 +95,7 @@ public class AdminInterface {
         		showRemoveEventsResultsWindow(scene);
 
         	}catch (Exception ex){
-        		AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawod體!");
+        		AlertBox.Display("B艂膮d", "Nie uda艂o si臋 za艂adowa膰 listy zawodw!");
                }
             });
         
@@ -687,7 +687,7 @@ public class AdminInterface {
        ObservableList<WindsurfingEvent> eventsObservableList = EventsInSeason.getEventsObservableList(dbConnection, seasonChoiceBox.getValue());
        TableView<WindsurfingEvent> eventsTableView = EventsInSeason.createEventsInSeasonTableView(eventsObservableList);
 
-       Label chooseEventLabel = new Label("Wybierz zawody, kt髍ych wyniki usun规:");
+       Label chooseEventLabel = new Label("Wybierz zawody, kt贸rych wyniki usun膮膰:");
        chooseEventLabel.setPadding(new Insets(5,5,5,5));
        Label errorLabel = new Label();
 
